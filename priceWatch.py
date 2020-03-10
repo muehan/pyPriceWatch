@@ -1,5 +1,9 @@
 import requests 
 import sys
+from io import StringIO
+from lxml import etree
+
+parser = etree.HTMLParser()
 
 def getPrice(url):
     headers = {
@@ -7,6 +11,7 @@ def getPrice(url):
     }
     response = requests.get(url, verify = False, headers = headers)
     content = response.text
+    tree = etree.parse(StringIO(content), parser=parser)
     # print(content)
     startIndex = content.find("<strong class=\"ZZdf\">")
     print(f"start: {startIndex}")
