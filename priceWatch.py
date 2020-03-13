@@ -14,7 +14,6 @@ def getPrice(url):
 
     result = re.findall(pattern, content)
 
-
     if result:
         print("Search successful.")
         print(result)
