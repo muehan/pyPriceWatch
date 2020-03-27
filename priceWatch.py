@@ -2,7 +2,7 @@ import requests
 import sys
 import re
 
-def getPrice(url):
+def getPriceElement(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36"
     }
@@ -13,12 +13,23 @@ def getPrice(url):
     pattern = "<div class=\"productDetail [0-9a-zA-Z]{4}\"><header></header><div class=\"[0-9a-zA-Z]{4}\"><strong class=\"[0-9a-zA-Z]{4}\"> [0-9]{1,10}.–</strong>"
 
     result = re.findall(pattern, content)
+    match = result[0]
 
-    if result:
+    if match:
         print("Search successful.")
-        print(result)
+        print(match)
     else:
-        print("Search unsuccessful.")	
+        print("Search unsuccessful.")
+
+    return match
+
+def getPriceText(element):
+    pattern = "[0-9]{1,10}.–"
+    price = re.findall(pattern, element)
+    print(price[0])
+    return price[0][:-2]
 
 URL = sys.argv[1]
-getPrice(URL)
+element = getPriceElement(URL)
+price = getPriceText(element)
+print(price)
