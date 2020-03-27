@@ -20,20 +20,20 @@ def getPriceElement(url):
     #<div class=\"productDetail [0-9a-zA-Z]{4}\"><header>\d*</header><div class=\"[0-9a-zA-Z]{4}\">.*<strong[0-9a-zA-Z=" ]{0,100}> [0-9./–]{4,10}</strong>
     result = re.findall(pattern, content)
 
-    print(result)
-
-    match = result[0]
-
-    if match:
+    if result:
         print("Search successful.")
-        print(match)
+        print(result[0])
     else:
         print("Search unsuccessful.")
 
-    return match
+    return ""
 
 def getPriceText(element):
-    pattern = "[0-9]{1,10}.–"
+    if not element:
+        print(element)
+        return "no price found"
+
+    pattern = "[0-9.– ]{4,10}"
     price = re.findall(pattern, element)
     print(price[0])
     return price[0][:-2]
