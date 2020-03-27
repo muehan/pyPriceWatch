@@ -38,6 +38,6 @@ def getNameText(content):
 
 def call(url):
     content = getContentFor(url)
-    price = getPriceText(conent)
+    price = getPriceText(content)
     name = getNameText(content)
     return price + "," + name
