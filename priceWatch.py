@@ -8,11 +8,13 @@ def getPriceElement(url):
     }
     response = requests.get(url, verify = False, headers = headers)
     content = response.text
+    content = content.replace('\n', ' ').replace('\r', '').replace('\r\n', '')
 
     # print(content)
     
     # <div class="productDetail Z1a6"><header></header><div class="Z1ab"><strong class="ZZon"> 153.–</strong>
-    pattern = "<div class=\"productDetail [0-9a-zA-Z]{4}\"><header></header><div class=\"[0-9a-zA-Z]{4}\"><strong class=\"[0-9a-zA-Z]{4}\"> [0-9./–]{4,10}</strong>"
+    # pattern = "<div class=\"productDetail [0-9a-zA-Z]{4}\"><header></header><div class=\"[0-9a-zA-Z]{4}\"><strong class=\"[0-9a-zA-Z]{4}\"> [0-9./–]{4,10}</strong>"
+    pattern = "<div class=\"productDetail [0-9a-zA-Z]{4}\">.*<strong[0-9a-zA-Z=\\ ]{0,100}> [0-9./–]{4,10}</strong>"
 
     # current regex state
     #<div class=\"productDetail [0-9a-zA-Z]{4}\"><header>\d*</header><div class=\"[0-9a-zA-Z]{4}\">.*<strong[0-9a-zA-Z=" ]{0,100}> [0-9./–]{4,10}</strong>
