@@ -33,7 +33,11 @@ def getPriceText(content):
     else:
         return price[0]
 
+def getNameText(content):
+    return "test"
+
 def call(url):
-    conent = getContentFor(url)
+    content = getContentFor(url)
     price = getPriceText(conent)
-    return price
+    name = getNameText(content)
+    return price + "," + name
