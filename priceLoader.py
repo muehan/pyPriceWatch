@@ -29,9 +29,9 @@ def getPriceText(content):
     pattern = "[0-9 .–]{4,10}"
     price = re.findall(pattern, element)
     if ".–" in price[0]:
-        return price[0][:-2]
+        return price[0][:-2].replace(' ','')
     else:
-        return price[0]
+        return price[0].replace(' ','')
 
 def getNameText(content):
     pattern = '<h1 class="productName [a-zA-Z0-9]{4}"><strong>.*</strong>.*</h1>'
