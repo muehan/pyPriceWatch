@@ -34,7 +34,16 @@ def getPriceText(content):
         return price[0]
 
 def getNameText(content):
-    return "test"
+    pattern = '<h1 class="productName [a-zA-Z0-9]{4}"><strong>.*</strong>.*</h1>'
+    result = re.findall(pattern, content)
+    if not result:
+        return "no name found"
+    
+    htmlPattern = r'<[a-zA-Z0-9="/ ]+>'
+    htmlEncodedChars = r'&\w+;'
+    noHtmlElements = re.sub(htmlPattern, '', result[0]).replace('<!-- -->', '')
+    noEncoding = re.sub(htmlEncodedChars, '', noHtmlElements)
+    return noEncoding
 
 def call(url):
     content = getContentFor(url)

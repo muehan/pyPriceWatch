@@ -19,4 +19,6 @@ if __name__ == '__main__':
     for url in urls:
         content = priceLoader.getContentFor(url)
         price = priceLoader.getPriceText(content)
+        name = priceLoader.getNameText(content)
         print(price)
+        print(name)
