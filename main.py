@@ -17,8 +17,8 @@ def getUrls():
 if __name__ == '__main__':
     urls = getUrls()
     for url in urls:
-        content = priceLoader.getContentFor(url)
+        content = priceLoader.getContentFor(url['value'])
         price = priceLoader.getPriceText(content)
-        name = priceLoader.getNameText(content)
+        # name = priceLoader.getNameText(content)
         print(price)
-        print(name)
+        # print(name)
