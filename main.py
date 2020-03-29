@@ -17,7 +17,6 @@ import psycopg2
 
 if __name__ == '__main__':
     store = Store()
-    store.open()
     urls = store.getUrls()
     try:
         store.open()

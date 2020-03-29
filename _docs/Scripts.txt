@@ -8,9 +8,10 @@ CREATE DATABASE pricewatch;
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- create table
-CREATE TABLE url (
+CREATE TABLE product (
    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-   value TEXT NOT NULL
+   name varchar(256),
+   url TEXT NOT NULL
 );
 
 -- insert urls
