@@ -17,9 +17,9 @@ import psycopg2
 
 if __name__ == '__main__':
     store = Store()
-    urls = store.getUrls()
     try:
         store.open()
+        urls = store.getUrls()
         for url in urls:
             content = priceLoader.getContentFor(url['value'])
             price = priceLoader.getPriceText(content)
