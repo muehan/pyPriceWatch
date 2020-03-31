@@ -61,7 +61,7 @@ class Store:
     def addProductName(self, url, name):
         try:
             cur = self.conn.cursor()
-            cur.execute("UPDATE product set name = '%s' where url ='%s';", (name, url))
+            cur.execute("UPDATE product set name = %s where url =%s;", (name, url))
             self.conn.commit()
             cur.close()
 
