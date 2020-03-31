@@ -29,3 +29,4 @@ CREATE TABLE price (
    price decimal NOT NULL,
    date DATE NOT NULL DEFAULT CURRENT_DATE
 );
+
