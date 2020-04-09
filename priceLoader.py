@@ -22,6 +22,8 @@ def getContentFor(url):
     return content
 
 def getProductsFromGraphqlEndpoint(id):
+    print("loading all products for: " + str(id))
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
         "Host": "www.digitec.ch",
@@ -30,7 +32,7 @@ def getProductsFromGraphqlEndpoint(id):
         "x-dg-loginstatus": "loggedOut",
         "x-dg-userid": "null",
         "x-dg-testgroup": "undefined",
-        "x-dg-sessionz": "3JWkNj4Ix3NRlVOjdJlKCA==",
+        "x-dg-sessionz": "3JWkNj1Ix3NRlVOjdJlKCA==",
         "x-dg-correlation-id": "6ce69274-0f0e-45a9-87f4-644fc9d1b10e",
         "Content-Type": "application/json",
         "x-dg-routename": "productDetail",

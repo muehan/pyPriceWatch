@@ -20,8 +20,10 @@ if __name__ == '__main__':
     try:
         store.open()
         ids = store.getProductTypeIds()
+        print("loaded all ids")
         for id in ids:
             products = priceLoader.getProductsFromGraphqlEndpoint(id["value"])
+            print("loaded all products for: " + str(id))
             print(len(products))
 
             for product in products:

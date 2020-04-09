@@ -41,3 +41,5 @@ CREATE TABLE producttype (
    name varchar(256)
 );
 
+GRANT UPDATE, INSERT, SELECT, DELETE ON ALL TABLES IN SCHEMA public TO pricewatch;
+
