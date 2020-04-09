@@ -29,6 +29,23 @@ class Store:
             print(error)
         return urls
 
+    def getProductTypeIds(self):
+        ids = []
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM producttype")
+            rows = cur.fetchall()
+
+            for row in rows:
+                id = row[0]
+                typeid = row[1]
+                ids.append({"key": id, "value": typeid})
+        
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return ids
+
     def storePrice(self, id, price):
 
         if not id:
@@ -70,6 +87,43 @@ class Store:
             return id
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
+
+    def addProductType(self, typeid, name):
+        try:
+            cur = self.conn.cursor()
+            cur.execute("INSERT INTO producttype (typeid, name) VALUES(%s, %s) RETURNING id;", (typeid, name))
+            id = cur.fetchone()[0]
+            self.conn.commit()
+            cur.close()
+
+            print('producttype created: ' + id)
+
+            return id
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+
+    def ProductCreateIfNotExist(self, product, productTypeId):
+        try:
+            cur = self.conn.cursor()
+            cur.execute("SELECT * FROM product where productId = '{0}'".format(product.id))
+            row = cur.fetchone()
+
+            if not row:
+                curc = self.conn.cursor()
+                curc.execute("""
+                    INSERT INTO product 
+                    (producttypeid, productId, productIdAsString, name, fullname, simpleName) 
+                    VALUES(%s, %s, %s, %s, %s, %s) RETURNING id;""", (productTypeId, product.id, product.productIdAsString, product.name, product.fullname, product.simpleName))
+                id = curc.fetchone()[0]
+                self.conn.commit()
+                curc.close()
+            else:
+                id = row[0]
+
+            cur.close()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+        return id
 
     def close(self):
         self.conn.close()

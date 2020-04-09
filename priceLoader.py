@@ -21,7 +21,7 @@ def getContentFor(url):
 
     return content
 
-def getGraphQlContentForId(id):
+def getProductsFromGraphqlEndpoint(id):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
         "Host": "www.digitec.ch",
@@ -40,19 +40,16 @@ def getGraphQlContentForId(id):
         "x-dg-country": "ch"
     }
 
-    # print(r.text)
     totalcount = getTotalCount(id)
     totalRoundedUp = roundup(totalcount)
 
     productModels = []
 
-    # print(totalcount)
-    # print(totalRoundedUp)
-    # print(int(totalRoundedUp / 100))
-
     for i in range(0, int(totalRoundedUp / 100)):
-        offset = i + 1
-        limit = (i + 1) * 100
+        offset = i * 100
+        limit = 100
+
+        print('offset: ' + str(offset) + ' limit: ' + str(limit))
 
         data = '[ '\
 	       '{ '\
@@ -87,12 +84,18 @@ def getGraphQlContentForId(id):
         products = filterProducts["products"]
         productsResults = products["results"]
         for pr in productsResults:
-            prices = pr["pricing"]
-            price = prices["price"]
-            inkl = price["amountIncl"]
+            try:
+                prices = pr["pricing"]
+                price = prices["price"]
+                if not price:
+                    continue
+                inkl = price["amountIncl"]
 
-            model = ProductModel(pr["id"],pr["productIdAsString"], pr["name"], pr["fullName"], pr["simpleName"], inkl)
-            
+                model = ProductModel(pr["id"], pr["productIdAsString"], pr["name"], pr["fullName"], pr["simpleName"], inkl)
+            except (Exception) as error:
+                print("unmarshal"  + str(error))
+                print(pr)
+
             productModels.append(model)
 
     return productModels
@@ -200,6 +203,6 @@ def call(url):
     return price + "," + name
 
 
-products = getGraphQlContentForId(83)
-for p in products:
-    print(p.price)
+# products = getProductsFromGraphqlEndpoint(83)
+# for p in products:
+#     print(p.price)

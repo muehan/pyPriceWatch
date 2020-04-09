@@ -10,8 +10,12 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- create table
 CREATE TABLE product (
    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+   producttypeid uuid REFERENCES producttype(id),
+   productId varchar(128),
+   productIdAsString varchar(128),
    name varchar(256),
-   url TEXT NOT NULL
+   fullname varchar(256),
+   simpleName varchar(256)
 );
 
 -- insert urls
@@ -25,8 +29,15 @@ INSERT INTO url (value) VALUES ('https://www.digitec.ch/de/s1/product/amd-ryzen-
 -- create price value table
 CREATE TABLE price (
    id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-   productid uuid REFERENCES url(id),
+   productid uuid REFERENCES product(id),
    price decimal NOT NULL,
    date DATE NOT NULL DEFAULT CURRENT_DATE
+);
+
+-- create productType table
+CREATE TABLE producttype (
+   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+   typeid INTEGER,
+   name varchar(256)
 );
 

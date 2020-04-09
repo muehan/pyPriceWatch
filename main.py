@@ -19,17 +19,19 @@ if __name__ == '__main__':
     store = Store()
     try:
         store.open()
-        urls = store.getUrls()
-        for url in urls:
-            content = priceLoader.getContentFor(url['value'])
-            price = priceLoader.getPriceTextFromMetaTag(content)
-            # name = priceLoader.getNameText(content)
-            store.storePrice(url['key'], price)
-            print(price)
-            # print(name)
+        ids = store.getProductTypeIds()
+        for id in ids:
+            products = priceLoader.getProductsFromGraphqlEndpoint(id["value"])
+            print(len(products))
+
+            for product in products:
+                # print(product.id + ' - ' + product.name + " - " + str(product.price))
+                productid = store.ProductCreateIfNotExist(product, id["key"])
+                store.storePrice(productid, product.price)
+
         store.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
+        print('main: ' + str(error))
     finally:
         store.close()
     
