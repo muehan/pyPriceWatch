@@ -56,7 +56,7 @@ def getProductsFromGraphqlEndpoint(id):
 		        '"operationName":"GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS", '\
 		        '"variables": '\
 		        '{'\
-		            '"productTypeId":' + str(83) + ','\
+		            '"productTypeId":' + str(id) + ','\
 			        '"queryString":"",'\
 			        '"offset":' + str(offset) + ','\
 			        '"limit":' + str(limit) + ','\
@@ -124,7 +124,7 @@ def getTotalCount(id):
 		        '"operationName":"GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS", '\
 		        '"variables": '\
 		        '{'\
-		            '"productTypeId":' + str(83) + ','\
+		            '"productTypeId":' + str(id) + ','\
 			        '"queryString":"",'\
 			        '"offset":0,'\
 			        '"limit":2000,'\

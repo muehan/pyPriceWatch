@@ -1,4 +1,5 @@
 import psycopg2
+import datetime
 from config import config
 
 class Store:
@@ -53,11 +54,21 @@ class Store:
             return
 
         try:
-            cur = self.conn.cursor()
-            cur.execute("INSERT INTO price (productid, price) VALUES(%s, %s)", (id, price))
-            self.conn.commit()
+            now = datetime.datetime.now()
+            dateStr = '' + str(now.year) + '-' + str(now.month).zfill(2) + '-' + str(now.day).zfill(2)
+
+            curs = self.conn.cursor()
             
-            cur.close()
+            curs.execute("SELECT * FROM price where productId = '{0}' and date = '{1}'".format(id, dateStr))
+            row = curs.fetchone()
+
+            if not row:
+                cur = self.conn.cursor()
+                cur.execute("INSERT INTO price (productid, price) VALUES(%s, %s)", (id, price))
+                self.conn.commit()
+                cur.close()
+            
+            curs.close()            
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
