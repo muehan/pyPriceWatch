@@ -22,7 +22,7 @@ if __name__ == '__main__':
         urls = store.getUrls()
         for url in urls:
             content = priceLoader.getContentFor(url['value'])
-            price = priceLoader.getPriceText(content)
+            price = priceLoader.getPriceTextFromMetaTag(content)
             # name = priceLoader.getNameText(content)
             store.storePrice(url['key'], price)
             print(price)

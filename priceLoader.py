@@ -24,7 +24,7 @@ def getPriceText(content):
 
     if not result:
         return "0"
-    element = result[0]    
+    element = result[0]
 
     pattern = "[0-9 .–]{4,10}"
     price = re.findall(pattern, element)
@@ -32,6 +32,19 @@ def getPriceText(content):
         return price[0][:-2].replace(' ','')
     else:
         return price[0].replace(' ','')
+
+def getPriceTextFromMetaTag(content):
+    pattern = r'<meta property="product:price:amount" content="[0-9]{0,5}"/>'
+    result = re.findall(pattern, content)
+
+    if not result:
+        return getPriceText(content)
+
+    element = result[0]
+    pattern = "[0-9]{1,5}"
+    price = re.findall(pattern, element)
+
+    return price[0]
 
 def getNameText(content):
     pattern = '<h1 class="productName [a-zA-Z0-9]{4}"><strong>.*</strong>.*</h1>'
