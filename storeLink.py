@@ -2,8 +2,9 @@ import psycopg2
 import datetime
 from config import config
 
+
 class Store:
-        
+
     conn = None
 
     def open(self):
@@ -24,7 +25,7 @@ class Store:
                 id = row[0]
                 url = row[1]
                 urls.append({"key": id, "value": url})
-        
+
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
@@ -41,13 +42,13 @@ class Store:
                 id = row[0]
                 typeid = row[1]
                 ids.append({"key": id, "value": typeid})
-        
+
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
         return ids
 
-    def storePrice(self, id, price):
+    def storePrice(self, id, price, insteadOfPrice):
 
         if not id:
             print('No Id defined for price')
@@ -55,27 +56,31 @@ class Store:
 
         try:
             now = datetime.datetime.now()
-            dateStr = '' + str(now.year) + '-' + str(now.month).zfill(2) + '-' + str(now.day).zfill(2)
+            dateStr = '' + str(now.year) + '-' + \
+                str(now.month).zfill(2) + '-' + str(now.day).zfill(2)
 
             curs = self.conn.cursor()
-            
-            curs.execute("SELECT * FROM price where productId = '{0}' and date = '{1}'".format(id, dateStr))
+
+            curs.execute(
+                "SELECT * FROM price where productId = '{0}' and date = '{1}'".format(id, dateStr))
             row = curs.fetchone()
 
             if not row:
                 cur = self.conn.cursor()
-                cur.execute("INSERT INTO price (productid, price) VALUES(%s, %s)", (id, price))
+                cur.execute(
+                    "INSERT INTO price (productid, price, insteadOfPrice) VALUES(%s, %s, %s)", (id, price, insteadOfPrice))
                 self.conn.commit()
                 cur.close()
-            
-            curs.close()            
+
+            curs.close()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
     def addProduct(self, url, name):
         try:
             cur = self.conn.cursor()
-            cur.execute("INSERT INTO product (url, name) VALUES(%s, %s) RETURNING id;", (url, name))
+            cur.execute(
+                "INSERT INTO product (url, name) VALUES(%s, %s) RETURNING id;", (url, name))
             id = cur.fetchone()[0]
             self.conn.commit()
             cur.close()
@@ -89,7 +94,8 @@ class Store:
     def addProductName(self, url, name):
         try:
             cur = self.conn.cursor()
-            cur.execute("UPDATE product set name = %s where url =%s;", (name, url))
+            cur.execute(
+                "UPDATE product set name = %s where url =%s;", (name, url))
             self.conn.commit()
             cur.close()
 
@@ -102,7 +108,8 @@ class Store:
     def addProductType(self, typeid, name):
         try:
             cur = self.conn.cursor()
-            cur.execute("INSERT INTO producttype (typeid, name) VALUES(%s, %s) RETURNING id;", (typeid, name))
+            cur.execute(
+                "INSERT INTO producttype (typeid, name) VALUES(%s, %s) RETURNING id;", (typeid, name))
             id = cur.fetchone()[0]
             self.conn.commit()
             cur.close()
@@ -116,7 +123,8 @@ class Store:
     def ProductCreateIfNotExist(self, product, productTypeId):
         try:
             cur = self.conn.cursor()
-            cur.execute("SELECT * FROM product where productId = '{0}'".format(product.id))
+            cur.execute(
+                "SELECT * FROM product where productId = '{0}'".format(product.id))
             row = cur.fetchone()
 
             if not row:

@@ -29,11 +29,10 @@ if __name__ == '__main__':
             for product in products:
                 # print(product.id + ' - ' + product.name + " - " + str(product.price))
                 productid = store.ProductCreateIfNotExist(product, id["key"])
-                store.storePrice(productid, product.price)
+                store.storePrice(productid, product.price, product.insteadOfPrice)
 
         store.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print('main: ' + str(error))
     finally:
         store.close()
-    

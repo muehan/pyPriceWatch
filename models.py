@@ -9,3 +9,4 @@ class ProductModel:
     fullname: str
     simpleName: str
     price: float
+    insteadOfPrice: float

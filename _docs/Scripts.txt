@@ -43,3 +43,7 @@ CREATE TABLE producttype (
 
 GRANT UPDATE, INSERT, SELECT, DELETE ON ALL TABLES IN SCHEMA public TO pricewatch;
 
+
+-- UPDATE 20200524
+ALTER TABLE price ADD COLUMN insteadOfPrice decimal;
+
