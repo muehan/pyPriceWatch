@@ -26,24 +26,6 @@ def getContentFor(url):
 def getProductsFromGraphqlEndpoint(id):
     print("loading all products for: " + str(id))
 
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
-        "Host": "www.digitec.ch",
-        # "x-dg-mandator": "406802",
-        # "x-dg-customertype": "standard",
-        # "x-dg-loginstatus": "loggedOut",
-        # "x-dg-userid": "null",
-        # "x-dg-testgroup": "undefined",
-        # "x-dg-sessionz": "3JWkNj1Ix3NRlVOjdJlKCA==",
-        # "x-dg-correlation-id": "6ce69274-0f0e-45a9-87f4-644fc9d1b10e",
-        "Content-Type": "application/json",
-        # "x-dg-routename": "productDetail",
-        # "x-dg-portal": "25",
-        # "x-dg-buildid": "314293",
-        # "x-dg-scrumteam": "Isotopes",
-        # "x-dg-country": "ch"
-    }
-
     totalcount = getTotalCount(id)
     totalRoundedUp = roundup(totalcount)
 
@@ -78,9 +60,11 @@ def getProductsFromGraphqlEndpoint(id):
             '}'\
             '}'\
             ']'
-
-        r = requests.post(url='https://www.digitec.ch/api/graphql',
-                          data=data, headers=headers, verify=False)
+        try:
+            r = requests.post(url='https://www.digitec.ch/api/graphql',
+                          data=data, headers=getHeaders(), verify=False)
+        except requests.exceptions.RequestException as e:  # This is the correct syntax
+            raise SystemExit(e)
         result = json.loads(r.text)
         listObject = result[0]
         data = listObject["data"]
@@ -163,23 +147,6 @@ def findInseadOfPrice(pricing):
 
 
 def getTotalCount(id):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
-        "Host": "www.digitec.ch",
-        "x-dg-mandator": "406802",
-        "x-dg-customertype": "standard",
-        "x-dg-loginstatus": "loggedOut",
-        "x-dg-userid": "null",
-        "x-dg-testgroup": "undefined",
-        "x-dg-sessionz": "3JWkNj4Ix3NRlVOjdJlKCA==",
-        "x-dg-correlation-id": "6ce69274-0f0e-45a9-87f4-644fc9d1b10e",
-        "Content-Type": "application/json",
-        "x-dg-routename": "productDetail",
-        "x-dg-portal": "25",
-        "x-dg-buildid": "314293",
-        "x-dg-scrumteam": "Isotopes",
-        "x-dg-country": "ch"
-    }
 
     data = '[ '\
         '{ '\
@@ -199,14 +166,14 @@ def getTotalCount(id):
         '"persistedQuery":'\
         '{'\
         '"version":1,'\
-        '"sha256Hash":"cd2107b20ecd5954254487b28679b7a12d0a42139e5ea1a244fcb281539a6a48"'\
+        '"sha256Hash":"5e95c793d5baba15ad5788c6706f5f06d8633a7daccc15d0172fe76827bbc26b"'\
         '}'\
         '}'\
         '}'\
         ']'
 
     r = requests.post(url='https://www.digitec.ch/api/graphql',
-                      data=data, headers=headers, verify=False)
+                      data=data, headers=getHeaders(), verify=False)
     result = json.loads(r.text)
     listObject = result[0]
     data = listObject["data"]
@@ -270,6 +237,24 @@ def call(url):
     name = getNameText(content)
     return price + "," + name
 
+def getHeaders():
+     return {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+        "Host": "www.digitec.ch",
+        # "x-dg-mandator": "406802",
+        # "x-dg-customertype": "standard",
+        # "x-dg-loginstatus": "loggedOut",
+        # "x-dg-userid": "null",
+        # "x-dg-testgroup": "undefined",
+        # "x-dg-sessionz": "3JWkNj4Ix3NRlVOjdJlKCA==",
+        # "x-dg-correlation-id": "6ce69274-0f0e-45a9-87f4-644fc9d1b10e",
+        "Content-Type": "application/json",
+        # "x-dg-routename": "productDetail",
+        # "x-dg-portal": "25",
+        # "x-dg-buildid": "314293",
+        # "x-dg-scrumteam": "Isotopes",
+        # "x-dg-country": "ch"
+    }
 
 # products = getProductsFromGraphqlEndpoint(83)
 # for p in products:
