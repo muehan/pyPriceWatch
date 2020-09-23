@@ -5,7 +5,7 @@ import os
 def info(message):
     if os.name != 'nt':
         logger = logging.getLogger('PriceWatchLogger')
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         logger.addHandler(handler)
         logger.info(message)
@@ -13,7 +13,7 @@ def info(message):
 def error(message):
     if os.name != 'nt':
         logger = logging.getLogger('PriceWatchLogger')
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.ERROR)
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         logger.addHandler(handler)
         logger.info(message)
