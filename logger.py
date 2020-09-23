@@ -9,6 +9,9 @@ def info(message):
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         logger.addHandler(handler)
         logger.info(message)
+    else:
+        print("info: " + message)
+
 
 def error(message):
     if os.name != 'nt':
@@ -17,3 +20,5 @@ def error(message):
         handler = logging.handlers.SysLogHandler(address = '/dev/log')
         logger.addHandler(handler)
         logger.info(message)
+    else:
+        print("error: " + message)

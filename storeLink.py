@@ -52,7 +52,7 @@ class Store:
     def storePrice(self, id, price, insteadOfPrice):
 
         if not id:
-            print('No Id defined for price')
+            logger.error('No Id defined for price')
             return
 
         try:
@@ -67,7 +67,7 @@ class Store:
             row = curs.fetchone()
 
             if not row:
-                logger.info("store new price for: " + id + " with price: " + price)
+                logger.info("store new price for: {0} with price: {1}".format(id,price))
                 cur = self.conn.cursor()
                 cur.execute(
                     "INSERT INTO price (productid, price, insteadOfPrice) VALUES(%s, %s, %s)", (id, price, insteadOfPrice))
@@ -76,7 +76,7 @@ class Store:
 
             curs.close()
         except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
+            logger.error(error.message)
 
     def addProduct(self, url, name):
         try:
@@ -130,7 +130,7 @@ class Store:
             row = cur.fetchone()
 
             if not row:
-                logger.info("new product created: " + product.fullname)
+                logger.info("new product created: {0}".format(product.fullname))
                 curc = self.conn.cursor()
                 curc.execute("""
                     INSERT INTO product 
@@ -144,7 +144,7 @@ class Store:
 
             cur.close()
         except (Exception, psycopg2.DatabaseError) as error:
-            print(error)
+            logger.error(error.message)
         return id
 
     def close(self):

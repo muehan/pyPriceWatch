@@ -24,7 +24,6 @@ def getContentFor(url):
 
 
 def getProductsFromGraphqlEndpoint(id):
-    print("loading all products for: " + str(id))
     logger.info("loading all products for: " + str(id))
 
     totalcount = getTotalCount(id)
@@ -36,7 +35,6 @@ def getProductsFromGraphqlEndpoint(id):
         offset = i * 100
         limit = 100
 
-        print('offset: ' + str(offset) + ' limit: ' + str(limit))
         logger.info('offset: ' + str(offset) + ' limit: ' + str(limit))
 
         data = '[ '\

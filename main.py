@@ -21,13 +21,11 @@ if __name__ == '__main__':
     try:
         store.open()
         ids = store.getProductTypeIds()
-        print("loaded all ids")
+        logger.info("loaded all ids")
         for id in ids:
             products = priceLoader.getProductsFromGraphqlEndpoint(id["value"])
-            print("loaded all products for: " + str(id))
-            print(len(products))
             logger.info("loaded all products for: " + str(id))
-            logger.info(len(products))
+            logger.info(str(len(products)))
 
             for product in products:
                 # print(product.id + ' - ' + product.name + " - " + str(product.price))
@@ -36,7 +34,6 @@ if __name__ == '__main__':
 
         store.close()
     except (Exception, psycopg2.DatabaseError) as error:
-        print('main: ' + str(error))
-        logger.error(str(error))
+        logger.error('main: ' + str(error))
     finally:
         store.close()
