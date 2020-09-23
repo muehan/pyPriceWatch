@@ -1,9 +1,12 @@
 from storeLink import Store
+import logger
 import priceLoader
 import psycopg2
 import sys
 
 def add(url):
+    
+
     store = Store()
     store.open()
     try:
@@ -16,6 +19,7 @@ def add(url):
         store.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+        logger.error(error)
     finally:
         store.close()
 

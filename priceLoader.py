@@ -4,10 +4,10 @@ import re
 import urllib3
 import json
 import math
+import logger
 from models import ProductModel
 
 urllib3.disable_warnings()
-
 
 def getContentFor(url):
     url = url.replace("\n", "")
@@ -25,6 +25,7 @@ def getContentFor(url):
 
 def getProductsFromGraphqlEndpoint(id):
     print("loading all products for: " + str(id))
+    logger.info("loading all products for: " + str(id))
 
     totalcount = getTotalCount(id)
     totalRoundedUp = roundup(totalcount)
@@ -36,6 +37,7 @@ def getProductsFromGraphqlEndpoint(id):
         limit = 100
 
         print('offset: ' + str(offset) + ' limit: ' + str(limit))
+        logger.info('offset: ' + str(offset) + ' limit: ' + str(limit))
 
         data = '[ '\
                '{ '\
@@ -64,6 +66,7 @@ def getProductsFromGraphqlEndpoint(id):
             r = requests.post(url='https://www.digitec.ch/api/graphql',
                           data=data, headers=getHeaders(), verify=False)
         except requests.exceptions.RequestException as e:  # This is the correct syntax
+            logger.error('error' + e.response)
             raise SystemExit(e)
         result = json.loads(r.text)
         listObject = result[0]
@@ -129,6 +132,7 @@ def getProductsFromGraphqlEndpoint(id):
             except (Exception) as error:
                 print("unmarshal" + str(error))
                 print(pr)
+                logger.error('error' + str(error))
 
             productModels.append(model)
 
