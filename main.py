@@ -1,6 +1,7 @@
 from storeLink import Store
 import priceLoader
 import psycopg2
+import logger
 
 # with open('list.txt') as f:
 #     line = f.readline()
@@ -25,6 +26,8 @@ if __name__ == '__main__':
             products = priceLoader.getProductsFromGraphqlEndpoint(id["value"])
             print("loaded all products for: " + str(id))
             print(len(products))
+            logger.info("loaded all products for: " + str(id))
+            logger.info(len(products))
 
             for product in products:
                 # print(product.id + ' - ' + product.name + " - " + str(product.price))
@@ -34,5 +37,6 @@ if __name__ == '__main__':
         store.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print('main: ' + str(error))
+        logger.error(str(error))
     finally:
         store.close()

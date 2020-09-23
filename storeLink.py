@@ -1,5 +1,6 @@
 import psycopg2
 import datetime
+import logger
 from config import config
 
 
@@ -66,6 +67,7 @@ class Store:
             row = curs.fetchone()
 
             if not row:
+                logger.info("store new price for: " + id + " with price: " + price)
                 cur = self.conn.cursor()
                 cur.execute(
                     "INSERT INTO price (productid, price, insteadOfPrice) VALUES(%s, %s, %s)", (id, price, insteadOfPrice))
@@ -128,6 +130,7 @@ class Store:
             row = cur.fetchone()
 
             if not row:
+                logger.info("new product created: " + product.fullname)
                 curc = self.conn.cursor()
                 curc.execute("""
                     INSERT INTO product 
