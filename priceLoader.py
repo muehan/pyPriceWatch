@@ -55,7 +55,7 @@ def getProductsFromGraphqlEndpoint(id):
             '"persistedQuery":'\
             '{'\
             '"version":1,'\
-            '"sha256Hash":"5e95c793d5baba15ad5788c6706f5f06d8633a7daccc15d0172fe76827bbc26b"'\
+            '"sha256Hash":"822e1996a25a7fd6d1d31c854a08f2707fad924139eca0342ffd2c537d3bebc5"'\
             '}'\
             '}'\
             '}'\
@@ -168,7 +168,7 @@ def getTotalCount(id):
         '"persistedQuery":'\
         '{'\
         '"version":1,'\
-        '"sha256Hash":"5e95c793d5baba15ad5788c6706f5f06d8633a7daccc15d0172fe76827bbc26b"'\
+        '"sha256Hash":"822e1996a25a7fd6d1d31c854a08f2707fad924139eca0342ffd2c537d3bebc5"'\
         '}'\
         '}'\
         '}'\
