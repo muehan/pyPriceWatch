@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 store.storePrice(productid, product.price, product.insteadOfPrice)
 
         store.close()
-    except (Exception, psycopg2.DatabaseError) as error:
+    except (Exception) as error:
         logger.error('main: ' + str(error))
     finally:
         store.close()
