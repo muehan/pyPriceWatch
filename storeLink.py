@@ -49,6 +49,19 @@ class Store:
             print(error)
         return ids
 
+    def findPrice(self, id):
+        now = datetime.datetime.now()
+        dateStr = '' + str(now.year) + '-' + \
+            str(now.month).zfill(2) + '-' + str(now.day).zfill(2)
+
+        curs = self.conn.cursor()
+
+        curs.execute(
+            "SELECT * FROM price where productId = '{0}' and date = '{1}'".format(id, dateStr))
+        row = curs.fetchone()
+
+        return row
+
     def storePrice(self, id, price, insteadOfPrice):
 
         if not id:
@@ -56,23 +69,14 @@ class Store:
             return
 
         try:
-            now = datetime.datetime.now()
-            dateStr = '' + str(now.year) + '-' + \
-                str(now.month).zfill(2) + '-' + str(now.day).zfill(2)
-
             curs = self.conn.cursor()
-
-            curs.execute(
-                "SELECT * FROM price where productId = '{0}' and date = '{1}'".format(id, dateStr))
-            row = curs.fetchone()
-
-            if not row:
-                logger.info("store new price for: {0} with price: {1}".format(id,price))
-                cur = self.conn.cursor()
-                cur.execute(
-                    "INSERT INTO price (productid, price, insteadOfPrice) VALUES(%s, %s, %s)", (id, price, insteadOfPrice))
-                self.conn.commit()
-                cur.close()
+            logger.info(
+                "store new price for: {0} with price: {1}".format(id, price))
+            cur = self.conn.cursor()
+            cur.execute(
+                "INSERT INTO price (productid, price, insteadOfPrice) VALUES(%s, %s, %s)", (id, price, insteadOfPrice))
+            self.conn.commit()
+            cur.close()
 
             curs.close()
         except (Exception, psycopg2.DatabaseError) as error:
@@ -130,7 +134,8 @@ class Store:
             row = cur.fetchone()
 
             if not row:
-                logger.info("new product created: {0}".format(product.fullname))
+                logger.info(
+                    "new product created: {0}".format(product.fullname))
                 curc = self.conn.cursor()
                 curc.execute("""
                     INSERT INTO product 
