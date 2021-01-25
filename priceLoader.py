@@ -28,6 +28,7 @@ def getProductsFromGraphqlEndpoint(id):
 
     totalcount = getTotalCount(id)
     totalRoundedUp = roundup(totalcount)
+    print(totalcount)
 
     productModels = []
 
@@ -55,13 +56,19 @@ def getProductsFromGraphqlEndpoint(id):
             '}'\
             ']'
         try:
+            # print(data + "\n\n")
             r = requests.post(url='https://www.digitec.ch/api/graphql',
                           data=data, headers=getHeaders(), verify=False)
         except requests.exceptions.RequestException as e:  # This is the correct syntax
             logger.error('error' + e.response)
             raise SystemExit(e)
         result = json.loads(r.text)
+        if not result:
+            return productModels
         listObject = result[0]
+        if not listObject["data"]:
+            print("there is an error in the api resonse")
+            continue
         data = listObject["data"]
         productType = data["productType"]
         filterProducts = productType["filterProductsV4"]
