@@ -1,0 +1,95 @@
+query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(
+  $productTypeId: Int!
+  $queryString: String!
+  $offset: Int
+  $limit: Int
+  $sort: ProductSort
+  $siteId: String
+  $sectorId: Int
+  $withDefaultOffer: Boolean
+) {
+  productType(id: $productTypeId) {
+    filterProductsV4(
+      queryString: $queryString
+      offset: $offset
+      limit: $limit
+      sort: $sort
+      siteId: $siteId
+      sectorId: $sectorId
+      withDefaultOffer: $withDefaultOffer
+    ) {
+      productCounts {
+        total
+        filteredTotal
+        __typename
+      }
+      productFilters {
+        filterGroupType
+        label
+        key
+        ...CheckboxFilterGroup
+        ...RangeSliderFilterGroup
+        __typename
+      }
+      __typename
+    }
+    __typename
+  }
+}
+fragment Tooltip on Tooltip {
+  text
+  moreInformationLink
+  __typename
+}
+fragment CheckboxFilterGroup on CheckboxFilterGroupV2 {
+  filterOptions {
+    ...Filter
+    __typename
+  }
+  __typename
+}
+fragment RangeSliderFilterGroup on RangeSliderFilterGroupV2 {
+  dataPoints {
+    ...RangeSliderDataPoint
+    __typename
+  }
+  selectedRange {
+    min
+    max
+    __typename
+  }
+  optionIdentifierKey
+  unitAbbreviation
+  unitDisplayOrder
+  totalCount
+  fullRange {
+    min
+    max
+    __typename
+  }
+  stepSize
+  mergeInfo {
+    isBottomMerged
+    isTopMerged
+    __typename
+  }
+  __typename
+}
+fragment Filter on Filter {
+  optionIdentifierKey
+  optionIdentifierValue
+  label
+  productCount
+  selected
+  tooltip {
+    ...Tooltip
+    __typename
+  }
+  __typename
+}
+fragment RangeSliderDataPoint on RangeSliderDataPoint {
+  value
+  productCount
+  __typename
+}
+

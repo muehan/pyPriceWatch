@@ -23,38 +23,114 @@ def getContentFor(url):
     return content
 
 
+# NORMAL PRICE
+# "pricing": {
+#     "supplierId": null,
+#     "secondHandSalesOfferId": null,
+#     "price": {
+#         "amountIncl": 389,
+#         "amountExcl": 361.19,
+#         "fraction": 0.077,
+#         "currency": "CHF",
+#         "__typename": "VatMoney"
+#     },
+#     "priceRebateFraction": null,
+#     "insteadOfPrice": null,
+#     "volumeDiscountPrices": [],
+#     "__typename": "Pricing"
+# },
+
+# Reduced Price
+# "pricing": {
+#     "supplierId": null,
+#     "secondHandSalesOfferId": null,
+#     "price": {
+#         "amountIncl": 339,
+#         "amountExcl": 314.76,
+#         "fraction": 0.077,
+#         "currency": "CHF",
+#         "__typename": "VatMoney"
+#     },
+#     "priceRebateFraction": 0.12,
+#     "insteadOfPrice": {
+#         "type": "SALESPRICEBEFORE",
+#         "price": {
+#             "amountIncl": 384,
+#             "amountExcl": 356.55,
+#             "currency": "CHF",
+#             "__typename": "VatMoneySum"
+#         },
+#         "__typename": "InsteadOfPrice"
+#     },
+
 def getProductsFromGraphqlEndpoint(id):
     logger.info("loading all products for: " + str(id))
 
-    totalcount = getTotalCount(id)
+    totalcount = getTotalCount(id, "")
     totalRoundedUp = roundup(totalcount)
     print(totalcount)
-
     productModels = []
 
+    if totalRoundedUp >= 10000:
+        print("more then 10000 products found, split search by brands")
+        filterBrands = getAllBrandFilters(id)
+        
+        for filter in filterBrands:
+            print("filter by: " + filter)
+            filteredtotalcount = getTotalCount(id, filter)
+            filteredtotalRoundedUp = roundup(filteredtotalcount)
+            print(filteredtotalcount)
+
+            brandProductModels = getAllProductModels(filteredtotalRoundedUp, id, filter)
+            productModels.extend(brandProductModels)
+    else:
+        productModels = getAllProductModels(totalRoundedUp, id, "")
+
+    return productModels
+
+def getAllBrandFilters(id):
+    data = '[ '\
+    '{ '\
+    '"operationName":"GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS", '\
+    '"variables": '\
+    '{'\
+    '"productTypeId":' + str(id) + ','\
+    '"queryString":"",'\
+    '"offset": 0,'\
+    '"limit": 10,'\
+    '"sort":"AVAILABILITY",'\
+    '"siteId":null,'\
+    '"sectorId":1'\
+    '},'\
+    '"query":'\
+    '"query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(  $productTypeId: Int!  $queryString: String!  $offset: Int  $limit: Int  $sort: ProductSort  $siteId: String  $sectorId: Int  $withDefaultOffer: Boolean) {  productType(id: $productTypeId) {    filterProductsV4(      queryString: $queryString      offset: $offset      limit: $limit      sort: $sort      siteId: $siteId      sectorId: $sectorId      withDefaultOffer: $withDefaultOffer    ) {      productCounts {        total        filteredTotal        __typename      }      productFilters {        filterGroupType        label        key        ...CheckboxFilterGroup        ...RangeSliderFilterGroup        __typename      }      __typename    }    __typename  }}fragment Tooltip on Tooltip {  text  moreInformationLink  __typename}fragment CheckboxFilterGroup on CheckboxFilterGroupV2 {  filterOptions {    ...Filter    __typename  }  __typename}fragment RangeSliderFilterGroup on RangeSliderFilterGroupV2 {  dataPoints {    ...RangeSliderDataPoint    __typename  }  selectedRange {    min    max    __typename  }  optionIdentifierKey  unitAbbreviation  unitDisplayOrder  totalCount  fullRange {    min    max    __typename  }  stepSize  mergeInfo {    isBottomMerged    isTopMerged    __typename  }  __typename}fragment Filter on Filter {  optionIdentifierKey  optionIdentifierValue  label  productCount  selected  tooltip {    ...Tooltip    __typename  }  __typename}fragment RangeSliderDataPoint on RangeSliderDataPoint {  value  productCount  __typename}"'\
+    '}'\
+    ']'
+
+    filterValues = []
+    r = requests.post(url='https://www.digitec.ch/api/graphql',
+                          data=data, headers=getHeaders(), verify=False)
+
+    result = json.loads(r.text)
+    filterObject = result[0]
+    data = filterObject["data"]
+    productType = data["productType"]
+    filterProducts = productType["filterProductsV4"]
+    filters = filterProducts["productFilters"]
+    for filter in filters:
+        if(filter["key"] == "grp_bra"):
+            for option in filter["filterOptions"]:
+                filterValues.append(option["optionIdentifierKey"] + "="+ option["optionIdentifierValue"])
+    return filterValues
+
+def getAllProductModels(totalRoundedUp, id, queryString):
+    productModels = []
     for i in range(0, int(totalRoundedUp / 100)):
         offset = i * 100
         limit = 100
+        logger.info('offset: ' + str(offset) + ' limit: ' + str(limit) + ' querystring: ' + queryString)
 
-        logger.info('offset: ' + str(offset) + ' limit: ' + str(limit))
-
-        data = '[ '\
-               '{ '\
-            '"operationName":"GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS", '\
-            '"variables": '\
-            '{'\
-            '"productTypeId":' + str(id) + ','\
-            '"queryString":"",'\
-            '"offset":' + str(offset) + ','\
-            '"limit":' + str(limit) + ','\
-            '"sort":"AVAILABILITY",'\
-            '"siteId":null,'\
-            '"sectorId":1'\
-            '},'\
-            '"query":'\
-            '"query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(  $productTypeId: Int!  $queryString: String!  $offset: Int  $limit: Int  $sort: ProductSort  $siteId: String  $sectorId: Int  $withDefaultOffer: Boolean) {  productType(id: $productTypeId) {    filterProductsV4(      queryString: $queryString      offset: $offset      limit: $limit      sort: $sort      siteId: $siteId      sectorId: $sectorId      withDefaultOffer: $withDefaultOffer    ) {      productCounts {        total        filteredTotal        __typename      }      products {        hasMore        results {          ...Product          __typename        }        resultsWithDefaultOffer {          ...ProductWithOffer          __typename        }        __typename      }      __typename    }    __typename  }}fragment Product on Product {  id  productIdAsString  productTypeIdAsString  productTypeName  imageUrl  imageSet {    alternateText    source    __typename  }  sectorId  name  brandId  brandName  fullName  simpleName  nameProperties  productConditionLabel  marketingDescription  pricing {    supplierId    secondHandSalesOfferId    price {      ...VatMoney      __typename    }    priceRebateFraction    insteadOfPrice {      type      price {        ...VatMoneySum        __typename      }      __typename    }    volumeDiscountPrices {      minAmount      price {        ...VatMoneySum        __typename      }      isDefault      __typename    }    __typename  }  availability {    icon    mail {      siteId      title      type      icon      text      description      tooltipDescription      deliveryDate      __typename    }    pickup {      title      notAllowedText      description      isAllowed      __typename    }    pickMup {      description      isAllowed      __typename    }    sites {      siteId      title      type      icon      text      description      tooltipDescription      deliveryDate      __typename    }    isFloorDeliveryAllowed    __typename  }  energyEfficiency {    energyEfficiencyColorType    energyEfficiencyLabelText    energyEfficiencyLabelSigns    energyEfficiencyImageUrl    __typename  }  salesInformation {    numberOfItems    numberOfItemsSold    isLowAmountRemaining    __typename  }  showroomSites  rating  totalRatings  totalQuestions  isIncentiveCashback  incentiveText  isNew  isBestseller  isProductSet  isSalesPromotion  isComparable  isDeleted  isHidden  canAddToBasket  hidePrice  germanNames {    germanProductTypeName    nameWithoutProperties    germanProductNameProperties    germanNameWithBrand    __typename  }  productGroups {    productGroup1    productGroup2    productGroup3    productGroup4    __typename  }  isOtherMandatorProduct  __typename}fragment ProductWithOffer on ProductWithOffer {  mandatorSpecificData {    ...ProductMandatorSpecific    __typename  }  product {    ...ProductMandatorIndependent    __typename  }  offer {    ...ProductOffer    __typename  }  __typename}fragment VatMoney on VatMoney {  amountIncl  amountExcl  fraction  currency  __typename}fragment VatMoneySum on VatMoneySum {  amountIncl  amountExcl  currency  __typename}fragment ProductMandatorSpecific on MandatorSpecificData {  isBestseller  isDeleted  showroomSites  sectorIds  __typename}fragment ProductMandatorIndependent on ProductV2 {  id  productId  name  nameProperties  productTypeId  productTypeName  brandId  brandName  averageRating  totalRatings  totalQuestions  isProductSet  images {    url    height    width    __typename  }  energyEfficiency {    energyEfficiencyColorType    energyEfficiencyLabelText    energyEfficiencyLabelSigns    energyEfficiencyImage {      url      height      width      __typename    }    __typename  }  hasVariants  smallDimensions  __typename}fragment ProductOffer on OfferV2 {  id  productId  offerId  shopOfferId  price {    amountIncl    amountExcl    currency    fraction    __typename  }  supplier {    name    countryIsoCode    countryName    deliversFromAbroad    __typename  }  label  type  volumeDiscountPrices {    minAmount    price {      amountIncl      amountExcl      currency      __typename    }    isDefault    __typename  }  salesInformation {    numberOfItems    numberOfItemsSold    isEndingSoon    __typename  }  incentiveText  isIncentiveCashback  isNew  isSalesPromotion  hideInProductDiscovery  canAddToBasket  hidePrice  insteadOfPrice {    type    price {      amountIncl      amountExcl      currency      fraction      __typename    }    __typename  }  __typename}"'\
-            '}'\
-            ']'
+        data = GetDataWithOffset(id, offset, limit, queryString)
         try:
             # print(data + "\n\n")
             r = requests.post(url='https://www.digitec.ch/api/graphql',
@@ -75,68 +151,51 @@ def getProductsFromGraphqlEndpoint(id):
         products = filterProducts["products"]
         productsResults = products["results"]
 
-        # NORMAL PRICE
-        # "pricing": {
-        #     "supplierId": null,
-        #     "secondHandSalesOfferId": null,
-        #     "price": {
-        #         "amountIncl": 389,
-        #         "amountExcl": 361.19,
-        #         "fraction": 0.077,
-        #         "currency": "CHF",
-        #         "__typename": "VatMoney"
-        #     },
-        #     "priceRebateFraction": null,
-        #     "insteadOfPrice": null,
-        #     "volumeDiscountPrices": [],
-        #     "__typename": "Pricing"
-        # },
-
-        # Reduced Price
-        # "pricing": {
-        #     "supplierId": null,
-        #     "secondHandSalesOfferId": null,
-        #     "price": {
-        #         "amountIncl": 339,
-        #         "amountExcl": 314.76,
-        #         "fraction": 0.077,
-        #         "currency": "CHF",
-        #         "__typename": "VatMoney"
-        #     },
-        #     "priceRebateFraction": 0.12,
-        #     "insteadOfPrice": {
-        #         "type": "SALESPRICEBEFORE",
-        #         "price": {
-        #             "amountIncl": 384,
-        #             "amountExcl": 356.55,
-        #             "currency": "CHF",
-        #             "__typename": "VatMoneySum"
-        #         },
-        #         "__typename": "InsteadOfPrice"
-        #     },
-
         for pr in productsResults:
-            try:
-                pricing = pr["pricing"]
-                price = pricing["price"]
-                if not price:
-                    continue
-                inkl = price["amountIncl"]
-
-                insteadOfPrice = findInseadOfPrice(pricing)
-
-                model = ProductModel(pr["id"], pr["productIdAsString"], pr["name"],
-                                     pr["fullName"], pr["simpleName"], inkl, insteadOfPrice)
-
-            except (Exception) as error:
-                print("unmarshal" + str(error))
-                print(pr)
-                logger.error('error' + str(error))
-
-            productModels.append(model)
+            model = createProduct(pr)
+            if model:
+                productModels.append(model)
 
     return productModels
 
+def GetDataWithOffset(id, offset, limit, querystring):
+    return '[ '\
+    '{ '\
+    '"operationName":"GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS", '\
+    '"variables": '\
+    '{'\
+    '"productTypeId":' + str(id) + ','\
+    '"queryString":"' + querystring + '",'\
+    '"offset":' + str(offset) + ','\
+    '"limit":' + str(limit) + ','\
+    '"sort":"AVAILABILITY",'\
+    '"siteId":null,'\
+    '"sectorId":1'\
+    '},'\
+    '"query":'\
+    '"query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(  $productTypeId: Int!  $queryString: String!  $offset: Int  $limit: Int  $sort: ProductSort  $siteId: String  $sectorId: Int  $withDefaultOffer: Boolean) {  productType(id: $productTypeId) {    filterProductsV4(      queryString: $queryString      offset: $offset      limit: $limit      sort: $sort      siteId: $siteId      sectorId: $sectorId      withDefaultOffer: $withDefaultOffer    ) {      productCounts {        total        filteredTotal        __typename      }      products {        hasMore        results {          ...Product          __typename        }        resultsWithDefaultOffer {          ...ProductWithOffer          __typename        }        __typename      }      __typename    }    __typename  }}fragment Product on Product {  id  productIdAsString  productTypeIdAsString  productTypeName  imageUrl  imageSet {    alternateText    source    __typename  }  sectorId  name  brandId  brandName  fullName  simpleName  nameProperties  productConditionLabel  marketingDescription  pricing {    supplierId    secondHandSalesOfferId    price {      ...VatMoney      __typename    }    priceRebateFraction    insteadOfPrice {      type      price {        ...VatMoneySum        __typename      }      __typename    }    volumeDiscountPrices {      minAmount      price {        ...VatMoneySum        __typename      }      isDefault      __typename    }    __typename  }  availability {    icon    mail {      siteId      title      type      icon      text      description      tooltipDescription      deliveryDate      __typename    }    pickup {      title      notAllowedText      description      isAllowed      __typename    }    pickMup {      description      isAllowed      __typename    }    sites {      siteId      title      type      icon      text      description      tooltipDescription      deliveryDate      __typename    }    isFloorDeliveryAllowed    __typename  }  energyEfficiency {    energyEfficiencyColorType    energyEfficiencyLabelText    energyEfficiencyLabelSigns    energyEfficiencyImageUrl    __typename  }  salesInformation {    numberOfItems    numberOfItemsSold    isLowAmountRemaining    __typename  }  showroomSites  rating  totalRatings  totalQuestions  isIncentiveCashback  incentiveText  isNew  isBestseller  isProductSet  isSalesPromotion  isComparable  isDeleted  isHidden  canAddToBasket  hidePrice  germanNames {    germanProductTypeName    nameWithoutProperties    germanProductNameProperties    germanNameWithBrand    __typename  }  productGroups {    productGroup1    productGroup2    productGroup3    productGroup4    __typename  }  isOtherMandatorProduct  __typename}fragment ProductWithOffer on ProductWithOffer {  mandatorSpecificData {    ...ProductMandatorSpecific    __typename  }  product {    ...ProductMandatorIndependent    __typename  }  offer {    ...ProductOffer    __typename  }  __typename}fragment VatMoney on VatMoney {  amountIncl  amountExcl  fraction  currency  __typename}fragment VatMoneySum on VatMoneySum {  amountIncl  amountExcl  currency  __typename}fragment ProductMandatorSpecific on MandatorSpecificData {  isBestseller  isDeleted  showroomSites  sectorIds  __typename}fragment ProductMandatorIndependent on ProductV2 {  id  productId  name  nameProperties  productTypeId  productTypeName  brandId  brandName  averageRating  totalRatings  totalQuestions  isProductSet  images {    url    height    width    __typename  }  energyEfficiency {    energyEfficiencyColorType    energyEfficiencyLabelText    energyEfficiencyLabelSigns    energyEfficiencyImage {      url      height      width      __typename    }    __typename  }  hasVariants  smallDimensions  __typename}fragment ProductOffer on OfferV2 {  id  productId  offerId  shopOfferId  price {    amountIncl    amountExcl    currency    fraction    __typename  }  supplier {    name    countryIsoCode    countryName    deliversFromAbroad    __typename  }  label  type  volumeDiscountPrices {    minAmount    price {      amountIncl      amountExcl      currency      __typename    }    isDefault    __typename  }  salesInformation {    numberOfItems    numberOfItemsSold    isEndingSoon    __typename  }  incentiveText  isIncentiveCashback  isNew  isSalesPromotion  hideInProductDiscovery  canAddToBasket  hidePrice  insteadOfPrice {    type    price {      amountIncl      amountExcl      currency      fraction      __typename    }    __typename  }  __typename}"'\
+    '}'\
+    ']'
+
+def createProduct(pr):
+    try:
+        pricing = pr["pricing"]
+        price = pricing["price"]
+        if not price:
+            print("no price found for:" + pr["productIdAsString"])
+            return
+
+        inkl = price["amountIncl"]
+        insteadOfPrice = findInseadOfPrice(pricing)
+        model = ProductModel(pr["id"], pr["productIdAsString"], pr["name"],
+                                pr["fullName"], pr["simpleName"], inkl, insteadOfPrice)
+
+        return model
+
+    except (Exception) as error:
+        print("unmarshal" + str(error))
+        print(pr)
+        logger.error('error' + str(error))
 
 def findInseadOfPrice(pricing):
     insteadOfPrice = pricing["insteadOfPrice"]
@@ -149,7 +208,7 @@ def findInseadOfPrice(pricing):
     return None
 
 
-def getTotalCount(id):
+def getTotalCount(id, queryString):
 
     data = '[ '\
         '{ '\
@@ -157,7 +216,7 @@ def getTotalCount(id):
         '"variables": '\
         '{'\
         '"productTypeId":' + str(id) + ','\
-        '"queryString":"",'\
+        '"queryString":"' + queryString + '",'\
         '"offset":0,'\
         '"limit":2000,'\
         '"sort":"AVAILABILITY",'\
@@ -178,7 +237,7 @@ def getTotalCount(id):
     filterProducts = productType["filterProductsV4"]
     productCounts = filterProducts["productCounts"]
 
-    return productCounts["total"]
+    return productCounts["filteredTotal"]
 
 
 def roundup(x):
