@@ -1,21 +1,6 @@
 from storeLink import Store
 import priceLoader
-import psycopg2
 import logger
-import reporting
-
-# with open('list.txt') as f:
-#     line = f.readline()
-#     cnt = 1
-#     while line:
-#         # print(line)
-#         price = priceLoader.call(line)
-#         print(price)
-#         print("")
-#         line = f.readline()
-
-# def getUrls():
-#     return storeLink.connect
 
 if __name__ == '__main__':
     store = Store()

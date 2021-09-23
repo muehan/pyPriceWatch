@@ -130,7 +130,7 @@ class Store:
         try:
             cur = self.conn.cursor()
             cur.execute(
-                "SELECT * FROM product where productId = '{0}'".format(product.id))
+                "SELECT * FROM product where productIdAsString = '{0}'".format(product.productIdAsString))
             row = cur.fetchone()
 
             if not row:

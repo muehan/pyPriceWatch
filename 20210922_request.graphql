@@ -21,6 +21,18 @@ query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(
         filteredTotal
         __typename
       }
+      productFilters {
+        filterGroupType
+        label
+        key
+        tooltip {
+          ...Tooltip
+          __typename
+        }
+        ...CheckboxFilterGroup
+        ...RangeSliderFilterGroup
+        __typename
+      }
       products {
         hasMore
         resultsWithDefaultOffer {
@@ -34,7 +46,45 @@ query GET_PRODUCT_TYPE_PRODUCTS_AND_FILTERS(
     __typename
   }
 }
-
+fragment Tooltip on Tooltip {
+  text
+  moreInformationLink
+  __typename
+}
+fragment CheckboxFilterGroup on CheckboxFilterGroupV2 {
+  filterOptions {
+    ...Filter
+    __typename
+  }
+  __typename
+}
+fragment RangeSliderFilterGroup on RangeSliderFilterGroupV2 {
+  dataPoints {
+    ...RangeSliderDataPoint
+    __typename
+  }
+  selectedRange {
+    min
+    max
+    __typename
+  }
+  optionIdentifierKey
+  unitAbbreviation
+  unitDisplayOrder
+  totalCount
+  fullRange {
+    min
+    max
+    __typename
+  }
+  stepSize
+  mergeInfo {
+    isBottomMerged
+    isTopMerged
+    __typename
+  }
+  __typename
+}
 fragment ProductWithOffer on ProductWithOffer {
   mandatorSpecificData {
     ...ProductMandatorSpecific
@@ -50,17 +100,21 @@ fragment ProductWithOffer on ProductWithOffer {
   }
   __typename
 }
-fragment VatMoney on VatMoney {
-  amountIncl
-  amountExcl
-  fraction
-  currency
+fragment Filter on Filter {
+  optionIdentifierKey
+  optionIdentifierValue
+  label
+  productCount
+  selected
+  tooltip {
+    ...Tooltip
+    __typename
+  }
   __typename
 }
-fragment VatMoneySum on VatMoneySum {
-  amountIncl
-  amountExcl
-  currency
+fragment RangeSliderDataPoint on RangeSliderDataPoint {
+  value
+  productCount
   __typename
 }
 fragment ProductMandatorSpecific on MandatorSpecificData {
@@ -136,11 +190,25 @@ fragment ProductOffer on OfferV2 {
     fraction
     __typename
   }
-  supplier {
-    name
-    countryIsoCode
-    countryName
-    deliversFromAbroad
+  deliveryOptions {
+    mail {
+      classification
+      futureReleaseDate
+      __typename
+    }
+    pickup {
+      siteId
+      classification
+      futureReleaseDate
+      __typename
+    }
+    detailsProvider {
+      productId
+      offerId
+      quantity
+      type
+      __typename
+    }
     __typename
   }
   label
@@ -160,6 +228,7 @@ fragment ProductOffer on OfferV2 {
     numberOfItems
     numberOfItemsSold
     isEndingSoon
+    validFrom
     __typename
   }
   incentiveText
@@ -180,5 +249,6 @@ fragment ProductOffer on OfferV2 {
     }
     __typename
   }
+  minOrderQuantity
   __typename
 }
